@@ -33,8 +33,8 @@ for cat in categories_to_run:
     cmd = [
         "scrapy", "crawl", "jsonl_downloader",
         "-a", f"category_key={cat}",
-        "-o", "extracted_information/testingthenewclicode.jsonl",
-        "--logfile", "extracted_information/logs/testingthenewclicode.log"
+        "-o", output_path,
+        "--logfile", log_path
     ]
 
     try:
