@@ -3,9 +3,13 @@ import os
 
 # List all categories you want to process in this batch
 categories_to_run = [  
-    'television', 
     'urgent'
 ]
+
+# Create a copy of the current system environment variables
+env = os.environ.copy()
+# Tell Python to look in the current directory for modules
+env["PYTHONPATH"] = os.getcwd()
 
 # Setup Directories
 base_output = "extracted_information"
@@ -35,7 +39,7 @@ for cat in categories_to_run:
 
     try:
         # Run the spider and wait for it to finish
-        result = subprocess.run(cmd, check=True)
+        result = subprocess.run(cmd, check=True, env=env)
         print(f"DONE: {cat} | Log: {log_path}")
     except subprocess.CalledProcessError:
         print(f"FAILED: {cat} | Check log for details: {log_path}")
