@@ -1,9 +1,21 @@
 import scrapy
+from scrapy.exceptions import CloseSpider
 import json
 import os
 
+class JsonlDownloaderSpider(scrapy.Spider):
+    name = "jsonl_downloader"    
 
-file_paths = {
+    # I replaced this with dynamic initialization to allow passing the category key from the command line.
+    # # ---------------------------------------------------------
+    # # CONFIGURATION: Hardcode your specific JSONL file and category here
+    # # ---------------------------------------------------------
+    # TARGET_FILE = file_paths['investigations'] # Change this to the desired JSONL file
+    # CATEGORY_NAME = 'تحقيقات' # Change this to the corresponding category name for the file
+    # TEST_LIMIT = None  # Set to a number (e.g., 3000) for testing
+    # # ---------------------------------------------------------
+
+    file_paths = {
             'arab': 'extracted_links/arab_article_links.jsonl',
             'art' : 'extracted_links/art_article_links.jsonl',
             'caricature' : 'extracted_links/caricature_article_links.jsonl',
@@ -14,20 +26,30 @@ file_paths = {
             'your_horoscope_today' : 'extracted_links/your_horoscope_today_article_links.jsonl',
         }# اقتصاد و بورصة, تحقيقات, تلفزيون, عاجل
 
+    category_mapping = {
+        'arab': 'عرب', 'art': 'فن', 'caricature': 'كاريكاتير',
+        'economy': 'اقتصاد و بورصة', 'investigations': 'تحقيقات',
+        'television': 'تلفزيون', 'urgent': 'عاجل',
+        'your_horoscope_today': 'حظك اليوم'
+    }
+
+    def __init__(self, category_key=None, *args, **kwargs):
+        super(JsonlDownloaderSpider, self).__init__(*args, **kwargs)
+        
+        # Validation: If no key is passed or the key isn't in our dictionary
+        if not category_key or category_key not in self.file_paths:
+            error_msg = f"CRITICAL ERROR: 'category_key' is missing or invalid. Received: '{category_key}'"
+            self.logger.error(error_msg)
+            raise CloseSpider(error_msg)
+
+        # Set variables dynamically based on the passed key
+        self.TARGET_FILE = self.file_paths[category_key]
+        self.CATEGORY_NAME = self.category_mapping.get(category_key, 'Unknown')
+        self.TEST_LIMIT = None 
+        
+        self.logger.info(f"Spider initialized for category: {self.CATEGORY_NAME}")
 
 
-class JsonlDownloaderSpider(scrapy.Spider):
-    name = "jsonl_downloader"    
-
-    # ---------------------------------------------------------
-    # CONFIGURATION: Hardcode your specific JSONL file and category here
-    # ---------------------------------------------------------
-    TARGET_FILE = file_paths['investigations'] # Change this to the desired JSONL file
-    CATEGORY_NAME = 'تحقيقات' # Change this to the corresponding category name for the file
-    TEST_LIMIT = None  # Set to a number (e.g., 3000) for testing
-    # ---------------------------------------------------------
-
-    
     def start_requests(self):
         if not os.path.exists(self.TARGET_FILE):
             self.logger.error(f"Target file not found: {self.TARGET_FILE}")
