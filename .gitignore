@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+extracted_information/
+extracted_links/
+example html/
+.scrapy/
