@@ -5,3 +5,5 @@ extracted_information/
 extracted_links/
 example html/
 .scrapy/
+data/raw/*.parquet
+data/processed/*.parquet
