@@ -6,14 +6,6 @@ import os
 class JsonlDownloaderSpider(scrapy.Spider):
     name = "jsonl_downloader"    
 
-    # I replaced this with dynamic initialization to allow passing the category key from the command line.
-    # # ---------------------------------------------------------
-    # # CONFIGURATION: Hardcode your specific JSONL file and category here
-    # # ---------------------------------------------------------
-    # TARGET_FILE = file_paths['investigations'] # Change this to the desired JSONL file
-    # CATEGORY_NAME = 'تحقيقات' # Change this to the corresponding category name for the file
-    # TEST_LIMIT = None  # Set to a number (e.g., 3000) for testing
-    # # ---------------------------------------------------------
 
     file_paths = {
             'arab': 'extracted_links/arab_article_links.jsonl',
@@ -25,13 +17,26 @@ class JsonlDownloaderSpider(scrapy.Spider):
             'urgent' : 'extracted_links/urgent_article_links.jsonl',
             'your_horoscope_today' : 'extracted_links/your_horoscope_today_article_links.jsonl',
         }# اقتصاد و بورصة, تحقيقات, تلفزيون, عاجل
-
+    
+    
     category_mapping = {
         'arab': 'عرب', 'art': 'فن', 'caricature': 'كاريكاتير',
         'economy': 'اقتصاد و بورصة', 'investigations': 'تحقيقات',
         'television': 'تلفزيون', 'urgent': 'عاجل',
         'your_horoscope_today': 'حظك اليوم'
     }
+    
+    # I replaced this with dynamic initialization to allow passing the category key from the command line.
+    # ---------------------------------------------------------
+    # CONFIGURATION: Hardcode your specific JSONL file and category here
+    # ---------------------------------------------------------
+    # TARGET_FILE = file_paths['your_horoscope_today'] # Change this to the desired JSONL file
+    # TARGET_FILE = r'G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\missing_arab.jsonl' # Change this to the desired JSONL file
+    # CATEGORY_NAME = category_mapping.get('arab')  # Change this to the corresponding category name for the file
+    # TEST_LIMIT = None  # Set to a number (e.g., 3000) for testing
+    # ---------------------------------------------------------
+
+
 
     def __init__(self, category_key=None, *args, **kwargs):
         super(JsonlDownloaderSpider, self).__init__(*args, **kwargs)
@@ -82,63 +87,66 @@ class JsonlDownloaderSpider(scrapy.Spider):
                     continue
 
     def parse(self, response):
-        # Use the specific article container ID to avoid sidebar/footer noise
-        # This ID is consistent across the provided samples
         main_article = response.css('#divcont')
+        if not main_article:
+            return
 
         item = {
             'article_id': main_article.css('::attr(data-id)').get(),
             'url': response.url,
-            'category': response.meta.get('category'),
-            'title': main_article.css('h1::text').get(),
-            'publish_date': main_article.css('.newsStoryDate::text').get(),
-            'author': main_article.css('.writeBy::text').get(),
-            
-            # Extracts all paragraph text inside the body and joins them
-            'content': " ".join(main_article.css('#articleBody p::text').getall()).strip(),
-            
-            # Captures all listed tags
-            'tags': main_article.css('.tags h3 a::text').getall(),
-            'images': []
+            'category': response.meta.get('category', 'unknown'),
+            'title': (main_article.css('h1::text').get() or "").strip(),
+            'publish_date': (main_article.css('.newsStoryDate::text').get() or "").strip(),
+            'author': (main_article.css('.writeBy::text').get() or "").strip(),
+            'content': " ".join([t.strip() for t in main_article.css('#articleBody ::text').getall() if t.strip()]),
+            'tags': [tag.strip() for tag in main_article.css('.tags h3 a::text').getall()],
+            'media': []
         }
 
-        # TARGETED IMAGE EXTRACTION
-        # 1. Main Featured Image (Usually at the top)
-        main_img_cont = main_article.css('.img-cont')
-        if main_img_cont:
-            item['images'].append({
-                'url': main_img_cont.css('img::attr(src)').get(),
-                'alt': main_img_cont.css('img::attr(alt)').get(),
-                'caption': main_img_cont.css('.img-cap::text').get(),
-                'type': 'featured'
-            })
+        # Helper function to determine provider
+        def get_provider(url):
+            if not url: return 'unknown'
+            return 'internal' if ('youm7.com' in url or 'static' in url) else 'external'
 
-        # 2. In-Text & Gallery Images (The ones after the text)
-        # These are often inside 'div.imgcontainer' or direct 'img' tags in the body
-        body_images = main_article.css('#articleBody .imgcontainer img, #articleBody img')
-        
-        for img in body_images:
+        # 1. IMAGES
+        all_imgs = main_article.css('.img-cont img, #articleBody img, .imgcontainer img')
+        for img in all_imgs:
             img_url = img.css('::attr(src)').get()
-            
-            # Skip tracking pixels or small icons
-            if not img_url or 'logo' in img_url.lower():
-                continue
-                
-            # Deduplication: Don't add the main featured image again
-            if any(img_url == existing['url'] for existing in item['images']):
-                continue
+            if img_url:
+                if not any(img_url == m['url'] for m in item['media']):
+                    item['media'].append({
+                        'type': 'image',
+                        'url': img_url,
+                        'alt': img.css('::attr(alt)').get(),
+                        'caption': img.css('::attr(title)').get() or main_article.css('.img-cap::text').get(),
+                        'provider': get_provider(img_url)
+                    })
 
-            # For gallery images, the 'title' attribute is often used as a caption
-            item['images'].append({
-                'url': img_url,
-                'alt': img.css('::attr(alt)').get(),
-                'caption': img.css('::attr(title)').get(), # Captures the 'title' as secondary caption
-                'type': 'body_gallery'
-            })
+        # 2. VIDEOS (Iframes & Native)
+        # Target common video embed sources
+        video_urls = main_article.css('iframe::attr(src), video source::attr(src), video::attr(src)').getall()
+        for v_url in video_urls:
+            if v_url and not any(v_url == m['url'] for m in item['media']):
+                item['media'].append({
+                    'type': 'video',
+                    'url': v_url,
+                    'alt': None,
+                    'caption': None,
+                    'provider': get_provider(v_url)
+                })
 
-        # Clean up whitespace for all string fields
-        for key in ['title', 'author', 'publish_date']:
-            if item[key]:
-                item[key] = item[key].strip()
+        # 3. AUDIO
+        audio_sources = main_article.css('audio source::attr(src), audio::attr(src)').getall()
+        audio_links = main_article.xpath('//a[contains(@href, ".mp3")]/@href').getall()
+        for a_url in set(audio_sources + audio_links):
+            full_audio_url = response.urljoin(a_url)
+            if not any(full_audio_url == m['url'] for m in item['media']):
+                item['media'].append({
+                    'type': 'audio',
+                    'url': full_audio_url,
+                    'alt': None,
+                    'caption': None,
+                    'provider': get_provider(full_audio_url)
+                })
 
         yield item

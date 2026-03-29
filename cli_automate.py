@@ -1,18 +1,20 @@
 import subprocess
 import os
 
-# List all categories you want to process in this batch
-categories_to_run = [  
-    'urgent'
-]
-
 # Create a copy of the current system environment variables
 env = os.environ.copy()
 # Tell Python to look in the current directory for modules
 env["PYTHONPATH"] = os.getcwd()
 
+
+# List all categories you want to process in this batch
+categories_to_run = [  
+    'art', 'caricature', 'economy', 'investigations', 'television', 'urgent', 'your_horoscope_today'
+]
+
+
 # Setup Directories
-base_output = "extracted_information"
+base_output = r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw"
 log_dir = os.path.join(base_output, "logs")
 
 for folder in [base_output, log_dir]:

@@ -22,9 +22,19 @@ ADDONS = {}
 ROBOTSTXT_OBEY = False
 
 # Concurrency and throttling settings
-CONCURRENT_REQUESTS = 130
-CONCURRENT_REQUESTS_PER_DOMAIN = 110
+CONCURRENT_REQUESTS = 40
+CONCURRENT_REQUESTS_PER_DOMAIN = 40
 DOWNLOAD_DELAY = 0
+
+# # 1. Tell Scrapy to use the Asyncio Reactor
+# TWISTED_REACTOR = 'twisted.internet.asyncioreactor.AsyncioSelectorReactor'
+
+# # 2. Force Windows to use the Proactor Event Loop (Supports 1000s of connections)
+# import sys
+# import asyncio
+
+# if sys.platform == 'win32':
+#     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 RETRY_TIMES = 3
 
