@@ -14,7 +14,7 @@ A high-performance Data Engineering project focused on the large-scale extractio
 ## 🛠️ Tech Stack
 
 - **Framework**: Scrapy
-- **Data Processing**: Python, Pandas, PyArrow
+- **Data Processing**: Python, Polars, PyArrow
 - **Storage Format**: JSONL, Apache Parquet
 - **Networking**: Twisted, Asyncio (Proactor)
 
