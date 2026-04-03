@@ -5,8 +5,16 @@ extracted_information/
 extracted_links/
 example html/
 .scrapy/
-data/raw/*.parquet
+data/raw/*.jsonl
+data/intermediate/*.parquet
 data/processed/*.parquet
-data/
-youm7_scrape/include/data/*
+youm7_scrape/include/data/raw/*.jsonl
+youm7_scrape/include/data/intermediate/*.parquet
 youm7_scrape/include/extracted_links/*
+
+# Ignore all data files
+include/data/**/*.jsonl
+include/data/**/*.parquet
+
+# BUT, do not ignore the .gitkeep files
+!**/ .gitkeep
