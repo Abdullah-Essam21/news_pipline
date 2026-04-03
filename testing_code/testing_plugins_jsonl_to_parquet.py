@@ -1,4 +1,4 @@
-from plugins.jsonl_to_parquet import run_conversion_pipeline
+from task_scripts.jsonl_to_parquet import run_conversion_pipeline
 import os
 
 # Use your local Windows paths for this quick test

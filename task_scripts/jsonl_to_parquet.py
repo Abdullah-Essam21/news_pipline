@@ -94,7 +94,6 @@ def normalize_record(r):
 
     return r
 
-
 def run_conversion_pipeline(input_path, output_path):
     """The main function called by Airflow"""
     writer = None
