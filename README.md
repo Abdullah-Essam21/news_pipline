@@ -1,6 +1,33 @@
 # Youm7 Big Data ETL Pipeline: From Scrapy to Airflow & Parquet
 
-A production-grade Data Engineering project focused on the large-scale extraction, transformation, and automated orchestration of news data. This pipeline processes over **270,000 articles** from the "Today's Seventh" (اليوم السابع) archive (2013–2026), converting raw web data into an optimized analytical format.
+A production-grade Data Engineering project focused on the large-scale extraction, transformation, and automated orchestration of news data. This pipeline processes over **2,000,000+ articles** from the "seventh day" (اليوم السابع) archive (2013–2026), converting raw web data into an optimized analytical format.
+
+## 📂 Project Directory Structure
+
+The project follows a modular architecture to separate the Scrapy spider logic, Airflow orchestration, and Python transformation scripts. This structure is optimized for **Astro CLI** and Dockerized environments.
+
+```text
+youm7-data-pipeline/
+├── dags/
+│   └── youm7_scrape_dag.py       # Airflow DAG (The Orchestrator)
+├── include/
+│   ├── youm7_scrape/             # Full Scrapy Project
+│   │   ├── spiders/
+│   │   │   └── archive_spider.py # Main Crawler Logic
+│   │   └── settings.py           # Reactor & Concurrency Config
+│   └── data/                     # Local Persistent Storage (Docker Volumes)
+│       ├── raw/                  # Output: .jsonl (Extracted)
+│       └── intermediate/         # Output: .parquet (Transformed)
+├── task_scripts/                 # Reusable Business Logic
+│   └── jsonl_to_parquet.py       # PyArrow Streaming & Normalization
+├── plugins/                      # Airflow Custom Providers/Hooks
+├── Dockerfile                    # System-level dependencies
+├── packages.txt                  # OS-level packages (e.g., build-essential)
+└── requirements.txt              # Python libraries (Scrapy, PyArrow, Polars)
+
+### Path Management
+
+To maintain environment-agnostic paths, the pipeline utilizes the `/usr/local/airflow/include` absolute path inside the Docker container. This ensures that the **BashOperator** (running Scrapy) and the **PythonOperator** (running the Transformer) are always looking at the same shared volume.
 
 ## 📌 Project Architecture
 
@@ -70,12 +97,9 @@ The project utilizes a strict **PyArrow Schema** to ensure the resulting Parquet
 | `tags`         | `list<string>` | Array of associated keywords                                   |
 | `media`        | `list<struct>` | Nested objects containing `type`, `url`, `alt`, and `provider` |
 
-## 🎯 Conclusion & Future Roadmap
-
-This project demonstrates the transition from simple web scraping to a **professional Data Engineering lifecycle**. By solving OS-level bottlenecks and implementing a streaming ETL pipeline in Airflow, the system can reliably process hundreds of thousands of records with minimal hardware overhead.
-
 ### Next Steps:
 
 - [ ] **Cloud Ingestion**: Adding a `GCSObjectStorage` task to move Parquet files to Google Cloud Storage.
 - [ ] **Data Warehouse**: Automating the load from GCS into **BigQuery** for SQL-based analysis.
 - [ ] **BI Layer**: Connecting **Power BI** to the BigQuery dataset to visualize news trends in Egypt over the last 13 years.
+```
