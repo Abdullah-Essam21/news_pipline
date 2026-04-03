@@ -103,7 +103,3 @@ The project utilizes a strict **PyArrow Schema** to ensure the resulting Parquet
 - [ ] **Cloud Ingestion**: Adding a `GCSObjectStorage` task to move Parquet files to Google Cloud Storage.
 - [ ] **Data Warehouse**: Automating the load from GCS into **BigQuery** for SQL-based analysis.
 - [ ] **BI Layer**: Connecting **Power BI** to the BigQuery dataset to visualize news trends in Egypt over the last 13 years.
-
-```
-
-```
