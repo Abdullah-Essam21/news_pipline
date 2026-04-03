@@ -1,4 +1,4 @@
-# Youm7 Big Data ETL Pipeline: From Scrapy to Airflow & Parquet
+# Youm7 Big Data ELT Pipeline: Scrapy, Airflow, and GCP Data Warehousing
 
 A production-grade Data Engineering project focused on the large-scale extraction, transformation, and automated orchestration of news data. This pipeline processes over **2,000,000+ articles** from the "seventh day" (اليوم السابع) archive (2013–2026), converting raw web data into an optimized analytical format.
 
@@ -13,7 +13,7 @@ youm7-data-pipeline/
 ├── include/
 │   ├── youm7_scrape/             # Full Scrapy Project
 │   │   ├── spiders/
-│   │   │   └── archive_spider.py # Main Crawler Logic
+│   │   │   └── download_new_articles_jsonl.py # Main Crawler Logic
 │   │   └── settings.py           # Reactor & Concurrency Config
 │   └── data/                     # Local Persistent Storage (Docker Volumes)
 │       ├── raw/                  # Output: .jsonl (Extracted)
