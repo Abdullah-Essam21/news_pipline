@@ -95,9 +95,10 @@ def normalize_record(r):
     return r
 
 def run_conversion_function(input_path, output_path):
-    """The main function called by Airflow"""
+    """The main function called by Airflow with deduplication."""
     writer = None
     batch = []
+    seen_ids = set() # Track unique article_ids in the current file
     chunk_size = 5000
 
     with open(input_path, "r", encoding='utf-8-sig') as f:
@@ -105,7 +106,11 @@ def run_conversion_function(input_path, output_path):
             try:
                 raw_data = json.loads(line)
                 r = normalize_record(raw_data)
-                if r: batch.append(r)
+                
+                # Deduplication logic
+                if r and r["article_id"] not in seen_ids:
+                    batch.append(r)
+                    seen_ids.add(r["article_id"])
             except json.JSONDecodeError:
                 continue
 
