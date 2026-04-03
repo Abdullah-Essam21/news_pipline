@@ -1,4 +1,4 @@
-from task_scripts.jsonl_to_parquet import run_conversion_pipeline
+from youm7_scrape.include.task_scripts.jsonl_to_parquet import run_conversion_pipeline
 import os
 
 # Use your local Windows paths for this quick test

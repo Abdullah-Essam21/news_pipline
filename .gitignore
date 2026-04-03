@@ -8,3 +8,5 @@ example html/
 data/raw/*.parquet
 data/processed/*.parquet
 data/
+youm7_scrape/include/data/*
+youm7_scrape/include/extracted_links/*
