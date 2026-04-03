@@ -11,16 +11,20 @@ class DownloadNewArticlesJsonlSpider(scrapy.Spider):
         'your_horoscope_today': 'حظك اليوم'
     }
 
-    def start_requests(self):
-        # Add as many categories as you want here
-        urls = {
+    def __init__(self, category=None, *args, **kwargs):
+        super(DownloadNewArticlesJsonlSpider, self).__init__(*args, **kwargs)
+        self.category = category
+        self.urls_dict = {
             "urgent": "https://www.youm7.com/Section/أخبار-عاجلة/65/1",
         }
-        for category, url in urls.items():
+
+    def start_requests(self):
+        url = self.urls_dict.get(self.category)
+        if url:
             yield scrapy.Request(
                 url=url, 
                 callback=self.parse, 
-                meta={'category': self.category_mapping.get(category, 'unknown')}
+                meta={'category': self.category_mapping.get(self.category, 'unknown')}
             )
 
     def parse(self, response):
