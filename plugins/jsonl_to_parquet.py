@@ -1,10 +1,9 @@
+import os
+import json
 import pyarrow as pa
 import pyarrow.parquet as pq
-import json
-import os
-import polars as pl
 
-
+# Define the schema exactly as you have it
 schema = pa.schema([
     ("article_id", pa.string()),
     ("url", pa.string()),
@@ -16,11 +15,11 @@ schema = pa.schema([
     ("tags", pa.list_(pa.string())),
     ("media", pa.list_(
         pa.struct([
-            ("type", pa.string()),      # 'image', 'video_embed', 'video_file', 'audio'
-            ("url", pa.string()),       # The source URL
-            ("alt", pa.string()),       # Only for images
-            ("caption", pa.string()),   # For images (captions/titles)
-            ("provider", pa.string())   # For videos (e.g., 'external' vs 'internal')
+            ("type", pa.string()),
+            ("url", pa.string()),
+            ("alt", pa.string()),
+            ("caption", pa.string()),
+            ("provider", pa.string())
         ])
     ))
 ])
@@ -96,67 +95,30 @@ def normalize_record(r):
     return r
 
 
-def jsonl_to_parquet_stream(input_file, output_file, chunk_size=5000):
+def run_conversion_pipeline(input_path, output_path):
+    """The main function called by Airflow"""
     writer = None
     batch = []
+    chunk_size = 5000
 
-    with open(input_file, "r", encoding='utf-8-sig') as f:
+    with open(input_path, "r", encoding='utf-8-sig') as f:
         for line in f:
             try:
                 raw_data = json.loads(line)
                 r = normalize_record(raw_data)
-                
-                if r: # Only append if the record is valid
-                    batch.append(r)
-                else:
-                    continue # Skip ghost records
-                    
+                if r: batch.append(r)
             except json.JSONDecodeError:
-                print("Skipping a malformed JSON line...")
                 continue
 
-            if len(batch) == chunk_size:
+            if len(batch) >= chunk_size:
                 table = pa.Table.from_pylist(batch, schema=schema)
-
-                if writer is None:
-                    writer = pq.ParquetWriter(output_file, schema)
-
+                if writer is None: writer = pq.ParquetWriter(output_path, schema)
                 writer.write_table(table)
                 batch = []
 
         if batch:
             table = pa.Table.from_pylist(batch, schema=schema)
-            if writer is None:
-                writer = pq.ParquetWriter(output_file, schema)
+            if writer is None: writer = pq.ParquetWriter(output_path, schema)
             writer.write_table(table)
 
-    if writer:
-        writer.close()
-
-# files = [
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\politics.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\reports.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\arab.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\art.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\caricature.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\economy.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\investigations.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\television.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\urgent.jsonl",
-#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\your_horoscope_today.jsonl"
-#         ]
-files = [
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\investigations.jsonl"
-        ]
-output_folder = r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\intermediate"
-# Process each file
-for file_path in files:
-    file_name = os.path.basename(file_path).replace(".jsonl", "")
-    output_path = os.path.join(output_folder, f"{file_name}.parquet")
-
-    print(f"Processing: {file_name}")
-    jsonl_to_parquet_stream(file_path, output_path)
-    print(f"Done: {output_path}\n")
-
-# df = pl.read_json(r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\processed\testing.jsonl", lines=True)
-# df.select('article_id', 'url', 'category', 'title', 'publish_date', 'author', 'content').write_csv(r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\processed\testing.csv", include_bom=True)
+    if writer: writer.close()
