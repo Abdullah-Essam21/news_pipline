@@ -153,17 +153,20 @@ def jsonl_to_parquet_stream(input_file, output_file, chunk_size=5000):
     if writer:
         writer.close()
 
+# files = [
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\politics.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\reports.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\arab.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\art.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\caricature.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\economy.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\investigations.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\television.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\urgent.jsonl",
+#         r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\your_horoscope_today.jsonl"
+#         ]
 files = [
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\politics.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\reports.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\arab.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\art.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\caricature.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\economy.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\investigations.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\television.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\urgent.jsonl",
-        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\your_horoscope_today.jsonl"
+        r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\raw\investigations.jsonl"
         ]
 output_folder = r"G:\coding\python\web_scraping\Youm7\youm7_scrape\data\intermediate"
 # Process each file
