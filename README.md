@@ -98,7 +98,7 @@ The project utilizes a strict **PyArrow Schema** to ensure the resulting Parquet
 | `tags`         | `list<string>` | Array of associated keywords                                   |
 | `media`        | `list<struct>` | Nested objects containing `type`, `url`, `alt`, and `provider` |
 
-### Next Steps:
+### Currently Working On:
 
 - [ ] **Cloud Ingestion**: Adding a `GCSObjectStorage` task to move Parquet files to Google Cloud Storage.
 - [ ] **Data Warehouse**: Automating the load from GCS into **BigQuery** for SQL-based analysis.
